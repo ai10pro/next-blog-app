@@ -1,11 +1,16 @@
 "use client";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFish } from "@fortawesome/free-solid-svg-icons";
 
-const Page: React.FC = () => {
+const Header: React.FC = () => {
   return (
-    <main>
-      <div className="text-2xl font-bold">Main</div>
-    </main>
+    <header>
+      <div className="bg-slate-800 py-2 font-bold text-white">
+        <FontAwesomeIcon icon={faFish} className="mr-1" />
+        Header
+      </div>
+    </header>
   );
 };
 
-export default Page;
+export default Header;
