@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Header from "@/app/_components/Header";
 
 export const metadata: Metadata = {
   title: "NextBlogApp",
@@ -15,9 +16,7 @@ const RootLayout: React.FC<Props> = (props) => {
   return (
     <html lang="ja">
       <body>
-        <header>
-          <div className="bg-slate-800 py-2 font-bold text-white">Header</div>
-        </header>
+        <Header />
         <div>{children}</div>
       </body>
     </html>
