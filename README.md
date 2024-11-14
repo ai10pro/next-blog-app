@@ -1,7 +1,7 @@
 # [Next-Blog-App] - Next.jsを用いたブログアプリ
 
 ## 概要
-Next.jsを用いたブログアプリです。
+Next.js (v14 + TypeScript + App Router)を用いたブログアプリです。
 
 ## 開発履歴
 - 2024年11月14日:プロジェクト開始
