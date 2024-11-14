@@ -3,7 +3,7 @@
 const Page: React.FC = () => {
   return (
     <main>
-      <div className="font-bold text-2xl">Main</div>
+      <div className="text-2xl font-bold">Main</div>
     </main>
   );
 };
