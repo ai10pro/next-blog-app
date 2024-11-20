@@ -16,8 +16,11 @@ const Header: React.FC = () => {
           )}
         >
           <div>
-            <FontAwesomeIcon icon={faFish} className="mr-1" />
-            ai10proのブログ
+            <Link href="/">
+              <FontAwesomeIcon icon={faFish} className="mr-1" />
+              ai10proのブログ
+            </Link>
+
           </div>
           <Link href="/about">About</Link>
         </div>
