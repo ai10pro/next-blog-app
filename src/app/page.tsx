@@ -2,28 +2,39 @@
 import { useState, useEffect } from "react";
 import type { Post } from "@/app/_types/Post";
 import PostSummary from "@/app/_components/PostSummary";
-import dummyPosts from "@/app/_mocks/dummyPosts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 const Page: React.FC = () => {
-  // 投稿データを「状態」として管理 (初期値はnull)
   const [posts, setPosts] = useState<Post[] | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // コンポーネントが読み込まれたときに「1回だけ」実行する処理
   useEffect(() => {
-    // 本来はウェブAPIを叩いてデータを取得するが、まずはモックデータを使用
-    // (ネットからのデータ取得をシミュレートして１秒後にデータをセットする)
-    const timer = setTimeout(() => {
-      console.log("ウェブAPIからデータを取得しました (虚言)");
-      setPosts(dummyPosts);
-    }, 1000); // 1000ミリ秒 = 1秒
-
-    // データ取得の途中でページ遷移したときにタイマーを解除する処理
-    return () => clearTimeout(timer);
+    const fetchPosts = async () => {
+      try {
+        const requestUrl = "https://w1980.blob.core.windows.net/pg3/posts.json";
+        const response = await fetch(requestUrl, {
+          method: "GET",
+          cache: "no-store", // キャッシュを利用しない
+        });
+        if (!response.ok) {
+          throw new Error("データの取得に失敗しました");
+        }
+        const data = (await response.json()) as Post[];
+        setPosts(data);
+      } catch (e) {
+        setFetchError(
+          e instanceof Error ? e.message : "予期せぬエラーが発生しました"
+        );
+      }
+    };
+    fetchPosts();
   }, []);
 
-  // 投稿データが取得できるまでは「Loading...」を表示
+  if (fetchError) {
+    return <div>{fetchError}</div>;
+  }
+
   if (!posts) {
     return (
       <div className="text-gray-500">
@@ -33,7 +44,6 @@ const Page: React.FC = () => {
     );
   }
 
-  // 投稿データが取得できたら「投稿記事の一覧」を出力
   return (
     <main>
       <div className="mb-2 text-2xl font-bold">Main</div>
