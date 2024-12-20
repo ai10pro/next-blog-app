@@ -37,7 +37,7 @@ export const GET = async (req: NextRequest) => {
         createdAt: "desc", // 降順 (新しい順)
       },
     });
-    console.log(categories);
+    // console.log(categories);
     return NextResponse.json(categories, { status: 200 }); // 200: OK
   } catch (error) {
     console.error(error);
