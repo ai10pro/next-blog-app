@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { twMerge } from "tailwind-merge";
@@ -140,7 +140,7 @@ const Page: React.FC = () => {
           ? checkableCategories.filter((c) => c.isSelect).map((c) => c.id)
           : [],
       };
-      const requestUrl = "api/admin/posts/";
+      const requestUrl = "/api/admin/posts/";
       console.log(`${requestUrl} => ${JSON.stringify(requestBody, null, 2)}`);
       const res = await fetch(requestUrl, {
         method: "POST",
@@ -262,7 +262,7 @@ const Page: React.FC = () => {
             value={newPostCoverImageUrl}
             onChange={updateNewPostCoverImageUrl}
             autoComplete="off"
-            required
+            // required　// カバーイメージは任意のため required は不要
           />
         </div>
         {/* カテゴリのチェックボックスを追加 */}
