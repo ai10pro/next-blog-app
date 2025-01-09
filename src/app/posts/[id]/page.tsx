@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation"; // ◀ 注目
-
+import type { Category } from "@/app/_types/Category";
 import type { Post } from "@/app/_types/Post";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -11,40 +11,46 @@ import DOMPurify from "isomorphic-dompurify";
 
 // 投稿記事の詳細表示 /posts/[id]
 const Page: React.FC = () => {
-  const [post, setPost] = useState<Post | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   // 動的ルートパラメータから 記事id を取得 （URL:/posts/[id]）
   const { id } = useParams() as { id: string };
 
-  const apiBaseEp = process.env.NEXT_PUBLIC_MICROCMS_BASE_EP!;
-  const apiKey = process.env.NEXT_PUBLIC_MICROCMS_API_KEY!;
+  const [categories, setCategories] = useState<Category[] | null>(null);
+  const [post, setPost] = useState<Post | null>(null);
+
+  // 投稿記事の詳細を取得する関数
+  const fetchPost = async () => {
+    try {
+      // microCMS から記事データを取得
+      const requestUrl = `/api/posts/${id}/`;
+      const res = await fetch(requestUrl, {
+        method: "GET",
+        cache: "no-store",
+      });
+      console.log(JSON.stringify(res));
+      if (!res.ok) {
+        setPost(null);
+        throw new Error(`${res.status}: ${res.statusText}`); // -> catch節に移動
+      }
+      const apiResBody = await res.json();
+      setPost(apiResBody as Post);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error
+          ? `記事の取得に失敗しました: ${error.message}`
+          : "予期せぬエラーが発生しました";
+      console.log(errorMsg);
+      setFetchError(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // コンポーネントが読み込まれたときに「1回だけ」実行する処理
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        // microCMS から記事データを取得
-        const requestUrl = `${apiBaseEp}/posts/${id}/`;
-        const response = await fetch(requestUrl, {
-          method: "GET",
-          cache: "no-store",
-          headers: {
-            "X-MICROCMS-API-KEY": apiKey,
-          },
-        });
-        if (!response.ok) {
-          throw new Error("データの取得に失敗しました");
-        }
-        const data = await response.json();
-        setPost(data as Post);
-      } catch (e) {
-        setFetchError(
-          e instanceof Error ? e.message : "予期せぬエラーが発生しました"
-        );
-      }
-    };
-    fetchPosts();
-  }, [apiBaseEp, apiKey, id]);
+    fetchPost();
+  }, []);
 
   // 投稿データの取得中は「Loading...」を表示
   if (fetchError) {
@@ -69,16 +75,18 @@ const Page: React.FC = () => {
     <main>
       <div className="space-y-2">
         <div className="mb-2 text-2xl font-bold">{post.title}</div>
-        <div>
-          <Image
-            src={post.coverImage.url}
-            alt="Example Image"
-            width={post.coverImage.width}
-            height={post.coverImage.height}
-            priority
-            className="rounded-xl"
-          />
-        </div>
+        {post.coverImage && (
+          <div>
+            <Image
+              src={post.coverImage.url}
+              alt="Example Image"
+              width={post.coverImage.width}
+              height={post.coverImage.height}
+              priority
+              className="rounded-xl"
+            />
+          </div>
+        )}
         <div dangerouslySetInnerHTML={{ __html: safeHTML }} />
       </div>
     </main>
