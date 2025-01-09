@@ -1,43 +1,78 @@
 "use client";
 import { useState, useEffect } from "react";
+import type { Category } from "@/app/_types/Category";
 import type { Post } from "@/app/_types/Post";
 import PostSummary from "@/app/_components/PostSummary";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 const Page: React.FC = () => {
-  const [posts, setPosts] = useState<Post[] | null>(null);
+  // ローディング状態、エラーメッセージのState
+  const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // 環境変数から「APIキー」と「エンドポイント」を取得
-  const apiBaseEp = process.env.NEXT_PUBLIC_MICROCMS_BASE_EP!;
-  const apiKey = process.env.NEXT_PUBLIC_MICROCMS_API_KEY!;
+  // カテゴリ配列 (State)。取得中と取得失敗時は null、既存カテゴリが0個なら []
+  const [categories, setCategories] = useState<Category[] | null>(null);
+
+  // 投稿記事配列 (State)。取得中と取得失敗時は null、既存記事が0個なら []
+  const [posts, setPosts] = useState<Post[] | null>(null);
+
+  // ウェブAPI (/api/categories) からカテゴリの一覧をフェッチする関数の定義
+  const fetchCategories = async () => {
+    try {
+      const requestUrl = `/api/categories`;
+      const res = await fetch(requestUrl, {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        setCategories([]);
+        throw new Error(`${res.status}: ${res.statusText}`);
+      }
+      const apiResBody = (await res.json()) as Category[];
+      setCategories(apiResBody);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error
+          ? `カテゴリの一覧フェッチに失敗しました: ${error.message}`
+          : "予期せぬエラーが発生しました";
+      setFetchError(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ウェブAPI (/api/posts) から投稿記事の一覧をフェッチする関数の定義
+  const fetchPosts = async () => {
+    try {
+      const requestUrl = `/api/posts`;
+      const res = await fetch(requestUrl, {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!res.ok) {
+        setPosts([]);
+        throw new Error(`${res.status}: ${res.statusText}`);
+      }
+      const apiResBody = (await res.json()) as Post[];
+      setPosts(apiResBody);
+    } catch (error) {
+      const errorMsg =
+        error instanceof Error
+          ? `投稿記事の一覧フェッチに失敗しました: ${error.message}`
+          : "予期せぬエラーが発生しました";
+      setFetchError(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        // microCMS から記事データを取得
-        const requestUrl = `${apiBaseEp}/posts`;
-        const response = await fetch(requestUrl, {
-          method: "GET",
-          cache: "no-store",
-          headers: {
-            "X-MICROCMS-API-KEY": apiKey,
-          },
-        });
-        if (!response.ok) {
-          throw new Error("データの取得に失敗しました");
-        }
-        const data = await response.json();
-        setPosts(data.contents as Post[]);
-      } catch (e) {
-        setFetchError(
-          e instanceof Error ? e.message : "予期せぬエラーが発生しました"
-        );
-      }
-    };
+    fetchCategories();
     fetchPosts();
-  }, [apiBaseEp, apiKey]);
+  }, []);
 
   if (fetchError) {
     return <div>{fetchError}</div>;
