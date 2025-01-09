@@ -157,6 +157,7 @@ const Page: React.FC = () => {
 
       const postResponse = await res.json();
       setIsSubmitting(false);
+      alert("新しい記事を作成しました。");
       router.push(`/posts/${postResponse.id}`); // 投稿記事の詳細ページに移動
     } catch (error) {
       const errorMsg =
