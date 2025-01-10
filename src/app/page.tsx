@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import type { Category } from "@/app/_types/Category";
 import type { Post } from "@/app/_types/Post";
+import type { PostApiResponse } from "@/app/_types/PostApiResponse";
 import PostSummary from "@/app/_components/PostSummary";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -17,47 +18,35 @@ const Page: React.FC = () => {
   // 投稿記事配列 (State)。取得中と取得失敗時は null、既存記事が0個なら []
   const [posts, setPosts] = useState<Post[] | null>(null);
 
-  // ウェブAPI (/api/categories) からカテゴリの一覧をフェッチする関数の定義
-  const fetchCategories = async () => {
-    try {
-      const requestUrl = `/api/categories`;
-      const res = await fetch(requestUrl, {
-        method: "GET",
-        cache: "no-store",
-      });
-
-      if (!res.ok) {
-        setCategories([]);
-        throw new Error(`${res.status}: ${res.statusText}`);
-      }
-      const apiResBody = (await res.json()) as Category[];
-      setCategories(apiResBody);
-    } catch (error) {
-      const errorMsg =
-        error instanceof Error
-          ? `カテゴリの一覧フェッチに失敗しました: ${error.message}`
-          : "予期せぬエラーが発生しました";
-      setFetchError(errorMsg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   // ウェブAPI (/api/posts) から投稿記事の一覧をフェッチする関数の定義
   const fetchPosts = async () => {
     try {
       const requestUrl = `/api/posts`;
-      const res = await fetch(requestUrl, {
+      const response = await fetch(requestUrl, {
         method: "GET",
         cache: "no-store",
       });
-
-      if (!res.ok) {
-        setPosts([]);
-        throw new Error(`${res.status}: ${res.statusText}`);
+      if (!response.ok) {
+        throw new Error("データの取得に失敗しました");
       }
-      const apiResBody = (await res.json()) as Post[];
-      setPosts(apiResBody);
+      const postResponse: PostApiResponse[] = await response.json();
+      setPosts(
+        postResponse.map((rawPost) => ({
+          id: rawPost.id,
+          title: rawPost.title,
+          content: rawPost.content,
+          coverImage: {
+            url: rawPost.coverImageURL,
+            width: 1000,
+            height: 1000,
+          },
+          createdAt: rawPost.createdAt,
+          categories: rawPost.categories.map((category) => ({
+            id: category.category.id,
+            name: category.category.name,
+          })),
+        }))
+      );
     } catch (error) {
       const errorMsg =
         error instanceof Error
@@ -70,7 +59,6 @@ const Page: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchCategories();
     fetchPosts();
   }, []);
 
