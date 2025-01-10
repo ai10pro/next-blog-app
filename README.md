@@ -11,10 +11,10 @@ Next.js (v14 + TypeScript + App Router)を用いたブログアプリです。
 
 ## 実装予定
 
-- admin/categoriesの作成
-- admin/posts/[id]の作成
-- admin/posts/[id]に移動ができるコンポーネント作成
-- POstSummaryのリファクタリング
+- ~~admin/categoriesの作成~~
+- ~~admin/posts/[id]の作成~~
+- ~~admin/posts/[id]に移動ができるコンポーネント作成~~
+- ~~POstSummaryのリファクタリング~~
 
 ## デモリンク
 
