@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation"; // ◀ 注目
-import type { Category } from "@/app/_types/Category";
+
 import type { Post } from "@/app/_types/Post";
+import type { PostApiResponse } from "@/app/_types/PostApiResponse";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import Image from "next/image";
@@ -16,41 +17,46 @@ const Page: React.FC = () => {
 
   // 動的ルートパラメータから 記事id を取得 （URL:/posts/[id]）
   const { id } = useParams() as { id: string };
-
-  const [categories, setCategories] = useState<Category[] | null>(null);
   const [post, setPost] = useState<Post | null>(null);
 
-  // 投稿記事の詳細を取得する関数
-  const fetchPost = async () => {
-    try {
-      // microCMS から記事データを取得
-      const requestUrl = `/api/posts/${id}/`;
-      const res = await fetch(requestUrl, {
-        method: "GET",
-        cache: "no-store",
-      });
-      console.log(JSON.stringify(res));
-      if (!res.ok) {
-        setPost(null);
-        throw new Error(`${res.status}: ${res.statusText}`); // -> catch節に移動
-      }
-      const apiResBody = await res.json();
-      setPost(apiResBody as Post);
-    } catch (error) {
-      const errorMsg =
-        error instanceof Error
-          ? `記事の取得に失敗しました: ${error.message}`
-          : "予期せぬエラーが発生しました";
-      console.log(errorMsg);
-      setFetchError(errorMsg);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  // コンポーネントが読み込まれたときに「1回だけ」実行する処理
   useEffect(() => {
-    fetchPost();
-  }, []);
+    const fetchPosts = async () => {
+      setIsLoading(true);
+      try {
+        const requestUrl = `/api/posts/${id}`;
+        const response = await fetch(requestUrl, {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error("データの取得に失敗しました");
+        }
+        const postApiResponse: PostApiResponse = await response.json();
+        setPost({
+          id: postApiResponse.id,
+          title: postApiResponse.title,
+          content: postApiResponse.content,
+          coverImage: {
+            url: postApiResponse.coverImageURL,
+            width: 1000,
+            height: 1000,
+          },
+          createdAt: postApiResponse.createdAt,
+          categories: postApiResponse.categories.map((category) => ({
+            id: category.category.id,
+            name: category.category.name,
+          })),
+        });
+      } catch (e) {
+        setFetchError(
+          e instanceof Error ? e.message : "予期せぬエラーが発生しました"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchPosts();
+  }, [id]);
 
   // 投稿データの取得中は「Loading...」を表示
   if (fetchError) {
