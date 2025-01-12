@@ -7,7 +7,7 @@ Next.js (v14 + TypeScript + App Router)を用いたブログアプリです。
 ## 開発履歴
 
 - 2024年11月14日:プロジェクト開始
--
+- 2025年01月13日 :カテゴリ名検索の実装
 
 ## 実装予定
 
@@ -15,6 +15,11 @@ Next.js (v14 + TypeScript + App Router)を用いたブログアプリです。
 - ~~admin/posts/[id]の作成~~
 - ~~admin/posts/[id]に移動ができるコンポーネント作成~~
 - ~~POstSummaryのリファクタリング~~
+- ~~posts/categories/[カテゴリ名]によるカテゴリ名検索~~
+- posts/day/[day]によるカテゴリ名検索 （例：[day]:20250101⇒2025/01/01）
+- admin/posts/categories/[カテゴリ名]によるカテゴリ名検索 (管理者権限バージョン)
+- admin/posts/day/[day]によるカテゴリ名検索 (管理者権限バージョン)
+- about/contact ページの作成
 
 ## デモリンク
 
