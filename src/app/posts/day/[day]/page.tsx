@@ -90,7 +90,7 @@ const Page: React.FC = () => {
       }
     };
     fetchPosts();
-  }, []);
+  }, [day, option]);
 
   if (fetchError) {
     return (
