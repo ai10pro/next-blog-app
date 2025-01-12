@@ -2,6 +2,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import type { Post } from "@/app/_types/Post";
+import type { PostApiResponse } from "@/app/_types/PostApiResponse";
+import PostSummary from "@/app/_components/PostSummary";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 const Page: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,21 +22,84 @@ const Page: React.FC = () => {
   const decodeCategoryName = (encodedCategoryName: string) => {
     return decodeURIComponent(encodedCategoryName);
   };
+  const decodedName = decodeCategoryName(categoryName);
 
   useEffect(() => {
-    // ウェブAPI (/api/posts) からカテゴリに紐づく投稿記事の一覧をフェッチする関数の定義
+    // ウェブAPI (/api/categories/${decodedName}) からカテゴリに紐づく投稿記事の一覧をフェッチする関数の定義
     const fetchPosts = async () => {
-      const decodedName = decodeCategoryName(categoryName);
-      console.log("Encoded Category Name:", categoryName);
-      console.log("Decoded Category Name:", decodedName);
-      // ここに処理を記述
+      setIsLoading(true);
+      try {
+        const requestUrl = `/api/posts${decodedName}`;
+        const response = await fetch(requestUrl, {
+          method: "GET",
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error("データの取得に失敗しました");
+        }
+        const postResponse: PostApiResponse[] = await response.json();
+        setPosts(
+          postResponse.map((rawPost) => ({
+            id: rawPost.id,
+            title: rawPost.title,
+            content: rawPost.content,
+            coverImage: {
+              url: rawPost.coverImageURL,
+              width: 1000,
+              height: 1000,
+            },
+            createdAt: rawPost.createdAt,
+            categories: rawPost.categories.map((category) => ({
+              id: category.category.id,
+              name: category.category.name,
+            })),
+          }))
+        );
+      } catch (error) {
+        const errorMsg =
+          error instanceof Error
+            ? `投稿記事の一覧フェッチに失敗しました: ${error.message}`
+            : "予期せぬエラーが発生しました";
+        setFetchError(errorMsg);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchPosts();
-  }, [categoryName]);
+  }, [decodedName]);
+
+  if (fetchError) {
+    return (
+      <div>
+        <div className="text-lg font-bold">
+          カテゴリ名一致検索 カテゴリ名: {decodeCategoryName(categoryName)}
+        </div>
+
+        <div className="text-lg text-red-500">{fetchError}</div>
+      </div>
+    );
+  }
+
+  if (!posts) {
+    return (
+      <div className="text-gray-500">
+        <FontAwesomeIcon icon={faSpinner} className="mr-1 animate-spin" />
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <main>
       <div className="mb-2 text-2xl font-bold">カテゴリ名一致検索</div>
+      <div className="mb-4 text-lg">
+        カテゴリ名: {decodeCategoryName(categoryName)}
+      </div>
+      <div className="space-y-3">
+        {posts.map((post) => (
+          <PostSummary key={post.id} post={post} />
+        ))}
+      </div>
     </main>
   );
 };
