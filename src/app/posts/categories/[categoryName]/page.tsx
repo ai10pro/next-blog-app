@@ -29,12 +29,13 @@ const Page: React.FC = () => {
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
-        const requestUrl = `/api/posts${decodedName}`;
+        const requestUrl = `/api/posts/categories/${decodedName}`;
         const response = await fetch(requestUrl, {
           method: "GET",
           cache: "no-store",
         });
         if (!response.ok) {
+          console.log(JSON.stringify(response));
           throw new Error("データの取得に失敗しました");
         }
         const postResponse: PostApiResponse[] = await response.json();
