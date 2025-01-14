@@ -51,7 +51,7 @@ const AdminPostSummary: React.FC<Props> = (props) => {
   };
 
   return (
-    <div className="border border-slate-400 p-3">
+    <div className="group border border-slate-400 p-3 hover:line-clamp-3">
       <div className="flex items-center justify-between">
         <div>{dayjs(post.createdAt).format(dtFmt)}</div>
         <div className="flex space-x-1.5">
@@ -74,7 +74,7 @@ const AdminPostSummary: React.FC<Props> = (props) => {
       <Link href={`/posts/${post.id}`}>
         <div className="mb-1 text-lg font-bold">{post.title}</div>
         <div
-          className="line-clamp-3"
+          className="line-clamp-1 group-hover:line-clamp-3"
           dangerouslySetInnerHTML={{ __html: safeHTML }}
         />
       </Link>
