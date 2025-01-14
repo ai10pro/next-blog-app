@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { twMerge } from "tailwind-merge";
@@ -19,6 +20,7 @@ const Page: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fetchErrorMsg, setFetchErrorMsg] = useState<string | null>(null);
+  const router = useRouter();
 
   // カテゴリ配列 (State)。取得中と取得失敗時は null、既存カテゴリが0個なら []
   const [categories, setCategories] = useState<Category[] | null>(null);
@@ -132,6 +134,7 @@ const Page: React.FC = () => {
         </Link>
       </div>
 
+      {/*  */}
       {categories.length === 0 ? (
         <div className="text-gray-500">
           （カテゴリは1個も作成されていません）
@@ -180,6 +183,39 @@ const Page: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* カテゴリ名検索 */}
+      {categories.length === 0 ? (
+        <div className="text-gray-500">
+          （カテゴリは1個も作成されていません）
+        </div>
+      ) : (
+        <div className="mt-4">
+          <div className="text-2xl font-bold">カテゴリ名検索</div>
+          <div className="space-y-1">
+            <label htmlFor="category" className="font-bold">
+              カテゴリ名一覧
+            </label>
+            <div className="flex space-x-1.5">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  className={twMerge(
+                    "rounded-md px-2 py-0.5",
+                    "text-xs font-bold",
+                    "border border-slate-400 text-slate-500"
+                  )}
+                  onClick={() => {
+                    router.push(`/admin/posts/categories/${category.name}`);
+                  }}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
