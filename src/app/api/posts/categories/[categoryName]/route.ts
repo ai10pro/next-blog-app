@@ -16,6 +16,22 @@ export const GET = async (req: NextRequest, routeParams: RouteParams) => {
     // パラメータからデコードされたカテゴリ名を取得
     const categoryName = decodeCategoryName(routeParams.params.categoryName);
     console.log("instance", routeParams.params.categoryName);
+
+    // カテゴリ名がカテゴリ一覧にあるか確認
+    const category = await prisma.category.findFirst({
+      where: {
+        name: categoryName,
+      },
+    });
+
+    if (!category) {
+      return NextResponse.json(
+        { error: `categoryName:${categoryName}が存在しません` },
+        { status: 404 }
+      );
+    }
+
+    // カテゴリ名に一致する投稿記事を取得
     const posts = await prisma.post.findMany({
       where: {
         categories: {
@@ -48,11 +64,10 @@ export const GET = async (req: NextRequest, routeParams: RouteParams) => {
 
     if (posts.length === 0) {
       return NextResponse.json(
-        { error: `categoryName=${categoryName}の投稿記事が見つかりません` },
-        { status: 404 }
+        { error: `categoryName:${categoryName}が含まれた投稿記事はありません` },
+        { status: 201 }
       );
     }
-
     return NextResponse.json(posts);
   } catch (error) {
     console.error(error);
