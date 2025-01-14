@@ -26,7 +26,7 @@ export const GET = async (req: NextRequest, routeParams: RouteParams) => {
 
     if (!category) {
       return NextResponse.json(
-        { error: `categoryName:${categoryName}が存在しません` },
+        { error: `categoryName:${categoryName} が存在しません` },
         { status: 404 }
       );
     }
@@ -64,7 +64,9 @@ export const GET = async (req: NextRequest, routeParams: RouteParams) => {
 
     if (posts.length === 0) {
       return NextResponse.json(
-        { error: `categoryName:${categoryName}が含まれた投稿記事はありません` },
+        {
+          error: `categoryName:${categoryName} が含まれた投稿記事はありません`,
+        },
         { status: 201 }
       );
     }

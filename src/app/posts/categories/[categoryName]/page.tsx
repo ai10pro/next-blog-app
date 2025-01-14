@@ -34,10 +34,14 @@ const Page: React.FC = () => {
           method: "GET",
           cache: "no-store",
         });
-        if (!response.ok) {
-          console.log(JSON.stringify(response));
+
+        if (response.status === 404 || response.status === 201) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "エラーが発生しました");
+        } else if (!response.ok) {
           throw new Error("データの取得に失敗しました");
         }
+
         const postResponse: PostApiResponse[] = await response.json();
         setPosts(
           postResponse.map((rawPost) => ({
@@ -59,7 +63,7 @@ const Page: React.FC = () => {
       } catch (error) {
         const errorMsg =
           error instanceof Error
-            ? `投稿記事の一覧フェッチに失敗しました: ${error.message}`
+            ? `${error.message}`
             : "予期せぬエラーが発生しました";
         setFetchError(errorMsg);
       } finally {
@@ -72,8 +76,9 @@ const Page: React.FC = () => {
   if (fetchError) {
     return (
       <div>
-        <div className="text-lg font-bold">
-          カテゴリ名一致検索 カテゴリ名: {decodeCategoryName(categoryName)}
+        <div className="text-2xl font-bold">カテゴリ名一致検索</div>
+        <div className="text-lg">
+          カテゴリ名: {decodeCategoryName(categoryName)}
         </div>
 
         <div className="text-lg text-red-500">{fetchError}</div>
