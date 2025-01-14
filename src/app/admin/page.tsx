@@ -22,6 +22,12 @@ const Page: React.FC = () => {
         </li>
         <li>
           <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
+          <Link className="text-blue-500 underline" href="/admin/posts/day">
+            /admin/posts/day
+          </Link>
+        </li>
+        <li>
+          <FontAwesomeIcon icon={faArrowRight} className="mr-2" />
           <Link className="text-blue-500 underline" href="/admin/categories">
             /admin/categories
           </Link>
