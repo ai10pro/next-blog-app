@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { twMerge } from "tailwind-merge";
-import { Category } from "@/app/_types/Category";
+import { useAuth } from "@/app/_hooks/useAuth";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 
@@ -35,6 +35,7 @@ const Page: React.FC = () => {
   const [newPostContentError, setNewPostContentError] = useState("");
   const [newPostCoverImageUrl, setNewPostCoverImageUrl] = useState("");
 
+  const token = useAuth();
   const router = useRouter();
   // カテゴリ配列 (State)。取得中と取得失敗時は null、既存カテゴリが0個なら []
   const [checkableCategories, setCheckableCategories] = useState<
@@ -128,6 +129,11 @@ const Page: React.FC = () => {
   // フォームの送信処理
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!token) {
+      window.alert("予期せぬ動作：トークンが取得できません。");
+      return;
+    }
+
     setIsSubmitting(true);
 
     // ▼▼ 追加 ウェブAPI (/api/admin/posts) にPOSTリクエストを送信する処理
@@ -147,6 +153,7 @@ const Page: React.FC = () => {
         cache: "no-store",
         headers: {
           "Content-Type": "application/json",
+          Authorization: token.token || "",
         },
         body: JSON.stringify(requestBody),
       });
@@ -166,6 +173,7 @@ const Page: React.FC = () => {
           : `予期せぬエラーが発生しました ${error}`;
       alert(errorMsg);
       console.error(errorMsg);
+      window.alert(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
